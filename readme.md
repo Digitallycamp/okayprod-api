@@ -88,3 +88,8 @@ $$\text{HTTP Request} \longrightarrow \text{user.routes} \longrightarrow \text{u
 2. The controller extracts the profile payload from the request body and passes it to **`user.services`**.
 3. **`user.services`** checks if the phone number format is valid and cleans up the input. It then calls **`user.repository`**.
 4. **`user.repository`** executes the actual database command against `user.model.js` to update the document and passes the fresh records back up the chain.
+
+
+// define openapi bloc spc 3.1
+// info block
+// path bloc

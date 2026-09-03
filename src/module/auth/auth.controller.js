@@ -1,14 +1,21 @@
 const User = require('../user/user.model.js');
 const emailService = require('../email/services/email.service.js');
 const crypto = require('crypto');
+const { authSchema } = require('../../utils/schema.js');
+
+const students = {
+	name: 'lios',
+	course: {
+		courese1: 'html',
+		course2: 'React',
+	},
+};
 
 const authController = {
 	register: async (req, res) => {
 		const { email, password } = req.body;
+
 		try {
-			if (!email || !password) {
-				return res.status(400).json({ message: 'All fields are required' });
-			}
 			const existingUser = await User.findOne({ email });
 			if (existingUser) {
 				return res.status(400).json({ message: 'User already exists' });

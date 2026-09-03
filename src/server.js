@@ -7,8 +7,10 @@ const { MongoStore } = require('connect-mongo');
 const app = require('./app.js');
 const authRouter = require('./module/auth/auth.routes.js');
 const profileRouter = require('./module/profle/profile.routes.js');
-
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./utils/swagger.json');
 const connectDb = require('./common/db/connetDb.js');
+const productRouter = require('./module/products/product.route.js');
 
 const port = process.env.PORT || 8000;
 
@@ -41,14 +43,17 @@ app.use(
 	})
 );
 
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //routes heer
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/profile', profileRouter);
+app.use('/api/v1/product', productRouter);
 
 const startServer = async () => {
 	await connectDb();
 	app.listen(port, () => {
 		console.log(`Server is running on port ${port}`);
+		console.log(`dumentation runing on http://localhost:${port}/docs`);
 	});
 };
 startServer();

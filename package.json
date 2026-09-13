@@ -17,8 +17,10 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "geoip-lite": "^1.4.10",
     "mongoose": "^9.6.2",
-    "nodemailer": "^8.0.10"
+    "nodemailer": "^8.0.10",
+    "ua-parser-js": "^2.0.10"
   },
   "devDependencies": {
     "dotenv": "^17.4.2",

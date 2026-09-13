@@ -6,7 +6,10 @@ const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
 const app = require('./app.js');
 const authRouter = require('./module/auth/auth.routes.js');
-const profileRouter = require('./module/profle/profile.routes.js');
+const profileRouter = require('./module/profile/profile.routes.js');
+const securityRouter = require('./module/security/security.routes.js');
+const sessionRouter = require('./module/session/session.routes.js');
+const storefrontRouter = require('./module/storefront/storefront.routes.js');
 
 const connectDb = require('./common/db/connetDb.js');
 
@@ -16,7 +19,7 @@ app.use(
 	cors({
 		origin: ['http://localhost:5173', 'http://localhost:5174'],
 		credentials: true,
-		methods: ['GET', 'POST', 'PUT', 'DELETE'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE' , 'PATCH'],
 	})
 );
 
@@ -42,8 +45,12 @@ app.use(
 );
 
 //routes heer
+
+app.use('/api/v1/security', securityRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/profile', profileRouter);
+app.use('/api/v1/security/sessions', sessionRouter);
+app.use('/api/v1/storefront', storefrontRouter);
 
 const startServer = async () => {
 	await connectDb();

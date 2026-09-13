@@ -7,6 +7,7 @@ const { MongoStore } = require('connect-mongo');
 const app = require('./app.js');
 const authRouter = require('./module/auth/auth.routes.js');
 const profileRouter = require('./module/profle/profile.routes.js');
+const transactionRouter = require('./module/transaction/transaction.routes.js');
 
 const connectDb = require('./common/db/connetDb.js');
 
@@ -44,6 +45,7 @@ app.use(
 //routes heer
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/profile', profileRouter);
+app.use('/api/v1/transactions', transactionRouter);
 
 const startServer = async () => {
 	await connectDb();

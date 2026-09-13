@@ -2,9 +2,13 @@ const express = require('express');
 const authController = require('./auth.controller.js');
 const auth = require('../../common/middleware/auth.middleware.js');
 const permisions = require('../../common/middleware/permision.middleware.js');
+const {
+	validate,
+} = require('../../common/middleware/validation.middleware.js');
+const { authSchema } = require('../../utils/schema.js');
 
 const authRouter = express.Router();
-authRouter.post('/register', authController.register);
+authRouter.post('/register', validate(authSchema), authController.register);
 authRouter.post('/login', authController.login);
 authRouter.post('/logout', authController.logout);
 authRouter.post('/google', authController.googleAuth);

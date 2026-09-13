@@ -13,12 +13,16 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
     "connect-mongo": "^6.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "joi": "^18.2.5",
     "mongoose": "^9.6.2",
-    "nodemailer": "^8.0.10"
+    "multer": "^2.3.0",
+    "nodemailer": "^8.0.10",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "dotenv": "^17.4.2",

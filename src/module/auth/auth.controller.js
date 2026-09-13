@@ -83,15 +83,14 @@ const createProfileForUser = async (userId, email) => {
 		console.error('Error creating Profile for user:', userId, err);
 		return null;
 	}
+
 };
 
 const authController = {
 	register: async (req, res) => {
 		const { email, password } = req.body;
+
 		try {
-			if (!email || !password) {
-				return res.status(400).json({ message: 'All fields are required' });
-			}
 			const existingUser = await User.findOne({ email });
 			if (existingUser) {
 				return res.status(400).json({ message: 'User already exists' });

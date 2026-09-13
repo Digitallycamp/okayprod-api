@@ -10,8 +10,11 @@ const profileRouter = require('./module/profile/profile.routes.js');
 const securityRouter = require('./module/security/security.routes.js');
 const sessionRouter = require('./module/session/session.routes.js');
 const storefrontRouter = require('./module/storefront/storefront.routes.js');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./utils/swagger.json');
 
 const connectDb = require('./common/db/connetDb.js');
+const productRouter = require('./module/products/product.route.js');
 
 const port = process.env.PORT || 8000;
 
@@ -44,6 +47,7 @@ app.use(
 	})
 );
 
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //routes heer
 
 app.use('/api/v1/security', securityRouter);
@@ -51,11 +55,13 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/profile', profileRouter);
 app.use('/api/v1/security/sessions', sessionRouter);
 app.use('/api/v1/storefront', storefrontRouter);
+app.use('/api/v1/product', productRouter);
 
 const startServer = async () => {
 	await connectDb();
 	app.listen(port, () => {
 		console.log(`Server is running on port ${port}`);
+		console.log(`dumentation runing on http://localhost:${port}/docs`);
 	});
 };
 startServer();

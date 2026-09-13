@@ -1,0 +1,95 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "Okayprod Api",
+		"summary": "This is an internal documentation for our team for all olayproudct api",
+		"version": "1.1.0",
+		"contact": {
+			"name": "Mr Wisdom",
+			"email": "team@okayprouct.com"
+		},
+		"license": {
+			"name": "Apache 2.0"
+		}
+	},
+	"paths": {
+		"/health": {
+			"get": {
+				"tags": ["Health"],
+				"description": "Check api health",
+				"responses": {
+					"200": {
+						"description": "Server ruunign well",
+						"content": {
+							"application/json": {},
+							"application/xml": {}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/login": {
+			"post": {
+				"tags": ["Login"],
+				"description": "Authenticate user",
+				"requestBody": {
+					"description": "Payoad data",
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"required": ["email", "password"],
+								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					}
+				},
+
+				"responses": {
+					"200": {
+						"description": "Login success",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									}
+								}
+							},
+							"application/xml": {}
+						}
+					},
+					"400": {
+						"description": "Bad request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": {
+											"type": "boolean"
+										},
+										"message": {
+											"type": "string"
+										}
+									}
+								}
+							},
+							"application/xml": {}
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -37,7 +37,11 @@ const profileSchema = new mongoose.Schema(
 			trim: true,
 		},
 		avatar: {
-			// URL — will be populated by Cloudinary in a future task
+			type: String,
+			default: null,
+		},
+		// NEW: Cloudinary public_id — used to delete the old image on replace
+		avatarPublicId: {
 			type: String,
 			default: null,
 		},

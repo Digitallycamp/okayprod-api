@@ -1,18 +1,21 @@
 const Storefront = require('./storefront.model.js');
+const {
+	uploadBuffer,
+	deleteFromCloudinary,
+} = require('../../utils/cloudinaryUpload.js');
 
 // Fields the authenticated user is allowed to update via the API.
-// Anything not in this list (like `user`) is ignored.
-const EDITABLE_FIELDS = ['primaryBrandColor', 'announcementBar', 'messageContent', 'logo'];
+const EDITABLE_FIELDS = [
+	'primaryBrandColor',
+	'announcementBar',
+	'messageContent',
+	'logo',
+];
 
 const storefrontController = {
-	/**
-	 * GET /api/v1/storefront
-	 * Returns the authenticated user's storefront.
-	 */
 	getStorefront: async (req, res) => {
 		try {
 			const userId = req.session.user.id;
-
 			const storefront = await Storefront.findOne({ user: userId }).lean();
 
 			if (!storefront) {
@@ -36,14 +39,9 @@ const storefrontController = {
 		}
 	},
 
-	/**
-	 * PATCH /api/v1/storefront
-	 * Updates only the editable fields of the authenticated user's storefront.
-	 */
 	updateStorefront: async (req, res) => {
 		try {
 			const userId = req.session.user.id;
-
 			const storefront = await Storefront.findOne({ user: userId });
 
 			if (!storefront) {
@@ -53,7 +51,6 @@ const storefrontController = {
 				});
 			}
 
-			// Only apply whitelisted fields — never blindly spread req.body
 			EDITABLE_FIELDS.forEach((field) => {
 				if (Object.prototype.hasOwnProperty.call(req.body, field)) {
 					storefront[field] = req.body[field];
@@ -72,6 +69,64 @@ const storefrontController = {
 			return res.status(500).json({
 				success: false,
 				message: 'Internal server error',
+			});
+		}
+	},
+
+	// NEW: Logo upload
+	updateLogo: async (req, res) => {
+		try {
+			const userId = req.session.user.id;
+
+			if (!req.file) {
+				return res.status(400).json({
+					success: false,
+					message: 'No file provided. Field name must be "logo".',
+				});
+			}
+
+			const storefront = await Storefront.findOne({ user: userId });
+			if (!storefront) {
+				return res.status(404).json({
+					success: false,
+					message: 'Storefront not found for this user',
+				});
+			}
+
+			// Delete previous logo from Cloudinary (if any) before replacing.
+			if (storefront.logoPublicId) {
+				await deleteFromCloudinary(storefront.logoPublicId);
+			}
+
+			// Upload new file
+			const result = await uploadBuffer(req.file.buffer, {
+				folder: `okayprod/storefronts/${userId}`,
+			});
+
+			storefront.logo = result.url;
+			storefront.logoPublicId = result.publicId;
+			await storefront.save();
+
+			return res.status(200).json({
+				success: true,
+				message: 'Logo updated successfully',
+				data: { logo: storefront.logo },
+			});
+		} catch (error) {
+			console.error('Error uploading logo:', error);
+
+			// Multer size limit produces a MulterError with this code
+			if (error.code === 'LIMIT_FILE_SIZE') {
+				return res.status(400).json({
+					success: false,
+					message: 'File too large. Maximum size is 2MB.',
+				});
+			}
+
+			// fileFilter rejections arrive as a generic Error
+			return res.status(400).json({
+				success: false,
+				message: error.message || 'Failed to upload logo',
 			});
 		}
 	},

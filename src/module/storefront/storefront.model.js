@@ -6,13 +6,15 @@ const storefrontSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'User',
 			required: true,
-			// Enforce one Storefront per User at the DB level
 			unique: true,
 			index: true,
 		},
-		// Logo URL — will be populated by Cloudinary in a future task.
-		// Null means no logo uploaded yet.
 		logo: {
+			type: String,
+			default: null,
+		},
+		// NEW: Cloudinary public_id — used to delete the old image on replace
+		logoPublicId: {
 			type: String,
 			default: null,
 		},

@@ -35,14 +35,14 @@ app.use(
 		saveUninitialized: false,
 		store: MongoStore.create({
 			mongoUrl: process.env.MONGO_URI,
-			ttl: 24 * 60 * 60 * 1000, // Session expiration time in seconds (1 day)
+			ttl: 24 * 60 * 60 * 1000, 
 		}),
 		cookie: {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production' ? true : false, // Set to true if using HTTPS in production
-			maxAge: 1000 * 24 * 60 * 60, // Session expires after 1 day
-			sameSite: 'lax', // Required for cross-site cookies
-			path: '/', // Cookie is valid for the entire site
+			secure: process.env.NODE_ENV === 'production' ? true : false, 
+			maxAge: 1000 * 24 * 60 * 60,
+			sameSite: 'lax',
+			path: '/',
 		},
 	})
 );

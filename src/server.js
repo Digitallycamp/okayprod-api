@@ -46,7 +46,6 @@ app.use(
 );
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use('/api/v1/security', securityRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/storefront', storefrontRouter);
 app.use('/api/v1/product', productRouter);

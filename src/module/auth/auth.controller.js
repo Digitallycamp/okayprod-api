@@ -3,13 +3,6 @@ const emailService = require('../email/services/email.service.js');
 const crypto = require('crypto');
 const { UAParser } = require('ua-parser-js');
 const SessionTrack = require('../session/session.model.js');
-const Storefront = require('../storefront/storefront.model.js');
-const Profile = require('../profile/profile.model.js');
-
-/**
- * Parse the incoming request's user-agent and create a SessionTrack document
- * for the given user + express-session ID.
- */
 const geoip = require('geoip-lite');
 
 const createSessionTrack = async (req, userId) => {
@@ -18,7 +11,6 @@ const createSessionTrack = async (req, userId) => {
 		const parser = new UAParser(ua);
 		const parsed = parser.getResult();
 		const deviceType = parsed.device.type || 'desktop';
-        // Location lookup — the IP never leaves this function
 		const clientIp = req.ip || req.headers['x-forwarded-for'] || '';
 		const geo = geoip.lookup(clientIp) || {};
 		await SessionTrack.create({
@@ -50,47 +42,16 @@ const createSessionTrack = async (req, userId) => {
 	}
 };
 
-/**
- * Create a Storefront for a newly registered user.
- * Uses the Storefront schema defaults for brand color, announcement bar and message.
- * If creation fails, we log the error but do NOT crash the registration flow —
- * the user is already created and can retry the storefront setup later.
- */
-const createStorefrontForUser = async (userId) => {
-	try {
-		// Guard against duplicate storefronts (in case of retries)
-		const existing = await Storefront.findOne({ user: userId });
-		if (existing) return existing;
 
-		const storefront = await Storefront.create({ user: userId });
-		return storefront;
-	} catch (err) {
-		console.error('Error creating Storefront for user:', userId, err);
-		return null;
-	}
-};
 
-const createProfileForUser = async (userId, email) => {
-	try {
-		const existing = await Profile.findOne({ user: userId });
-		if (existing) return existing;
-
-		return await Profile.create({
-			user: userId,
-			email: email || '',
-		});
-	} catch (err) {
-		console.error('Error creating Profile for user:', userId, err);
-		return null;
-	}
-
-};
 
 const authController = {
 	register: async (req, res) => {
 		const { email, password } = req.body;
-
 		try {
+			if (!email || !password) {
+				return res.status(400).json({ message: 'All fields are required' });
+			}
 			const existingUser = await User.findOne({ email });
 			if (existingUser) {
 				return res.status(400).json({ message: 'User already exists' });
@@ -98,11 +59,6 @@ const authController = {
 
 			const newUser = new User({ email, password });
 			await newUser.save();
-
-			// NEW: create the user's Storefront with defaults
-			await createStorefrontForUser(newUser._id);
-			await createProfileForUser(newUser._id, email);
-
 			return res.status(201).json({ message: 'User registered successfully' });
 		} catch (error) {
 			console.error('Error during registration:', error);
@@ -172,10 +128,6 @@ const authController = {
 				isNewUser = true;
 			}
 
-			// NEW: only create the Storefront for brand-new Google users
-			if (isNewUser) {
-				await createStorefrontForUser(user._id);
-			}
 
 			req.session.regenerate((err) => {
 				if (err) {

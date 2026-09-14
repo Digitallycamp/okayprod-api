@@ -9,7 +9,6 @@ const authRouter = require('./module/auth/auth.routes.js');
 const profileRouter = require('./module/profile/profile.routes.js');
 const securityRouter = require('./module/security/security.routes.js');
 const sessionRouter = require('./module/session/session.routes.js');
-const storefrontRouter = require('./module/storefront/storefront.routes.js');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./utils/swagger.json');
 
@@ -54,7 +53,6 @@ app.use('/api/v1/security', securityRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/profile', profileRouter);
 app.use('/api/v1/security/sessions', sessionRouter);
-app.use('/api/v1/storefront', storefrontRouter);
 app.use('/api/v1/product', productRouter);
 
 const startServer = async () => {

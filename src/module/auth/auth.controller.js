@@ -2,63 +2,12 @@ const User = require('../user/user.model.js');
 const emailService = require('../email/services/email.service.js');
 const crypto = require('crypto');
 const { UAParser } = require('ua-parser-js');
-const SessionTrack = require('../session/session.model.js');
 const Storefront = require('../storefront/storefront.model.js');
-const Profile = require('../profile/profile.model.js');
 
-/**
- * Parse the incoming request's user-agent and create a SessionTrack document
- * for the given user + express-session ID.
- */
-const geoip = require('geoip-lite');
 
-const createSessionTrack = async (req, userId) => {
-	try {
-		const ua = req.headers['user-agent'] || '';
-		const parser = new UAParser(ua);
-		const parsed = parser.getResult();
-		const deviceType = parsed.device.type || 'desktop';
-        // Location lookup — the IP never leaves this function
-		const clientIp = req.ip || req.headers['x-forwarded-for'] || '';
-		const geo = geoip.lookup(clientIp) || {};
-		await SessionTrack.create({
-			userId,
-			sessionId: req.sessionID,
-			userAgent: ua,
-			browser: {
-				name: parsed.browser.name || 'Unknown',
-				version: parsed.browser.version || '',
-			},
-			os: {
-				name: parsed.os.name || 'Unknown',
-				version: parsed.os.version || '',
-			},
-			device: {
-				type: deviceType,
-				vendor: parsed.device.vendor || '',
-				model: parsed.device.model || '',
-			},
-			location: {
-				country: geo.country || '',
-				region:  geo.region  || '',
-				city:    geo.city    || '',
-			},
-			lastSeenAt: new Date(),
-		});
-	} catch (err) {
-		console.error('Error creating SessionTrack:', err);
-	}
-};
-
-/**
- * Create a Storefront for a newly registered user.
- * Uses the Storefront schema defaults for brand color, announcement bar and message.
- * If creation fails, we log the error but do NOT crash the registration flow —
- * the user is already created and can retry the storefront setup later.
- */
 const createStorefrontForUser = async (userId) => {
 	try {
-		// Guard against duplicate storefronts (in case of retries)
+		
 		const existing = await Storefront.findOne({ user: userId });
 		if (existing) return existing;
 
@@ -70,27 +19,13 @@ const createStorefrontForUser = async (userId) => {
 	}
 };
 
-const createProfileForUser = async (userId, email) => {
-	try {
-		const existing = await Profile.findOne({ user: userId });
-		if (existing) return existing;
-
-		return await Profile.create({
-			user: userId,
-			email: email || '',
-		});
-	} catch (err) {
-		console.error('Error creating Profile for user:', userId, err);
-		return null;
-	}
-
-};
-
 const authController = {
 	register: async (req, res) => {
 		const { email, password } = req.body;
-
 		try {
+			if (!email || !password) {
+				return res.status(400).json({ message: 'All fields are required' });
+			}
 			const existingUser = await User.findOne({ email });
 			if (existingUser) {
 				return res.status(400).json({ message: 'User already exists' });
@@ -98,10 +33,7 @@ const authController = {
 
 			const newUser = new User({ email, password });
 			await newUser.save();
-
-			// NEW: create the user's Storefront with defaults
 			await createStorefrontForUser(newUser._id);
-			await createProfileForUser(newUser._id, email);
 
 			return res.status(201).json({ message: 'User registered successfully' });
 		} catch (error) {
@@ -134,7 +66,7 @@ const authController = {
 				email: user.email,
 			};
 
-			await createSessionTrack(req, user._id);
+			
 
 			return res.status(200).json({ message: 'Login successful' });
 		});
@@ -158,7 +90,7 @@ const authController = {
 			const googleUser = await response.json();
 			let user = await User.findOne({ email: googleUser.email });
 
-			// Only create a Storefront if this is a BRAND NEW user
+			
 			let isNewUser = false;
 
 			if (!user) {
@@ -172,7 +104,7 @@ const authController = {
 				isNewUser = true;
 			}
 
-			// NEW: only create the Storefront for brand-new Google users
+
 			if (isNewUser) {
 				await createStorefrontForUser(user._id);
 			}
@@ -195,7 +127,7 @@ const authController = {
 						return res.status(500).json({ message: 'Internal server error' });
 					}
 
-					await createSessionTrack(req, user._id);
+					
 
 					return res.status(200).json({ message: 'Login successful' });
 				});

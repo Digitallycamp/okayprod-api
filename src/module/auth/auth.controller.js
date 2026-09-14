@@ -1,21 +1,57 @@
 const User = require('../user/user.model.js');
 const emailService = require('../email/services/email.service.js');
 const crypto = require('crypto');
-const { authSchema } = require('../../utils/schema.js');
+const { UAParser } = require('ua-parser-js');
+const SessionTrack = require('../session/session.model.js');
+const geoip = require('geoip-lite');
 
-const students = {
-	name: 'lios',
-	course: {
-		courese1: 'html',
-		course2: 'React',
-	},
+const createSessionTrack = async (req, userId) => {
+	try {
+		const ua = req.headers['user-agent'] || '';
+		const parser = new UAParser(ua);
+		const parsed = parser.getResult();
+		const deviceType = parsed.device.type || 'desktop';
+		const clientIp = req.ip || req.headers['x-forwarded-for'] || '';
+		const geo = geoip.lookup(clientIp) || {};
+		await SessionTrack.create({
+			userId,
+			sessionId: req.sessionID,
+			userAgent: ua,
+			browser: {
+				name: parsed.browser.name || 'Unknown',
+				version: parsed.browser.version || '',
+			},
+			os: {
+				name: parsed.os.name || 'Unknown',
+				version: parsed.os.version || '',
+			},
+			device: {
+				type: deviceType,
+				vendor: parsed.device.vendor || '',
+				model: parsed.device.model || '',
+			},
+			location: {
+				country: geo.country || '',
+				region:  geo.region  || '',
+				city:    geo.city    || '',
+			},
+			lastSeenAt: new Date(),
+		});
+	} catch (err) {
+		console.error('Error creating SessionTrack:', err);
+	}
 };
+
+
+
 
 const authController = {
 	register: async (req, res) => {
 		const { email, password } = req.body;
-
 		try {
+			if (!email || !password) {
+				return res.status(400).json({ message: 'All fields are required' });
+			}
 			const existingUser = await User.findOne({ email });
 			if (existingUser) {
 				return res.status(400).json({ message: 'User already exists' });
@@ -23,13 +59,13 @@ const authController = {
 
 			const newUser = new User({ email, password });
 			await newUser.save();
-
 			return res.status(201).json({ message: 'User registered successfully' });
 		} catch (error) {
 			console.error('Error during registration:', error);
 			return res.status(500).json({ message: 'Internal server error' });
 		}
 	},
+
 	login: async (req, res) => {
 		const { email, password } = req.body;
 		if (!email || !password) {
@@ -42,7 +78,7 @@ const authController = {
 			return res.status(400).json({ message: 'Invalid email or password' });
 		}
 
-		req.session.regenerate((err) => {
+		req.session.regenerate(async (err) => {
 			if (err) {
 				console.error('Session regeneration error:', err);
 				return res.status(500).json({ message: 'Internal server error' });
@@ -54,14 +90,14 @@ const authController = {
 				email: user.email,
 			};
 
+			await createSessionTrack(req, user._id);
+
 			return res.status(200).json({ message: 'Login successful' });
 		});
 	},
 
 	googleAuth: async (req, res) => {
-		console.log('Received Google auth request with body:', req.body);
 		const { token } = req.body;
-		console.log('Received Google token:', token);
 		if (!token) {
 			return res.status(400).json({ message: 'Google token is required' });
 		}
@@ -77,15 +113,21 @@ const authController = {
 
 			const googleUser = await response.json();
 			let user = await User.findOne({ email: googleUser.email });
+
+			// Only create a Storefront if this is a BRAND NEW user
+			let isNewUser = false;
+
 			if (!user) {
 				user = new User({
 					username: googleUser.name,
 					email: googleUser.email,
-					password: googleUser.sub + 'snjksnsj', // Generate a random password or use a fixed string since it's not used for Google-authenticated users
+					password: googleUser.sub + 'snjksnsj',
 					provider: 'google',
 				});
 				await user.save();
+				isNewUser = true;
 			}
+
 
 			req.session.regenerate((err) => {
 				if (err) {
@@ -99,14 +141,14 @@ const authController = {
 					email: user.email,
 				};
 
-				// FIX: Force the session to save to the store BEFORE responding to the client
-				req.session.save((saveErr) => {
+				req.session.save(async (saveErr) => {
 					if (saveErr) {
 						console.error('Session save error:', saveErr);
 						return res.status(500).json({ message: 'Internal server error' });
 					}
 
-					// Now the cookie is safe and the session data is written!
+					await createSessionTrack(req, user._id);
+
 					return res.status(200).json({ message: 'Login successful' });
 				});
 			});
@@ -131,16 +173,14 @@ const authController = {
 				path: '/',
 				httpOnly: true,
 				secure: process.env.NODE_ENV === 'production' ? true : false,
-				sameSite: 'lax', // match your local dev setting
+				sameSite: 'lax',
 			});
 			return res.status(200).json({ message: 'Logout successful' });
 		});
 	},
 
 	forgotPassword: async (req, res) => {
-		// Implementation for forgot password
 		const { email } = req.body;
-		console.log(email);
 		if (!email) {
 			return res.status(400).json({ message: 'Email is required' });
 		}
@@ -151,21 +191,19 @@ const authController = {
 				.json({ message: 'User with this email does not exist' });
 		}
 
-		// Here you would generate a password reset token, save it to the user, and send an email with the reset link
 		const resetToken = crypto.randomBytes(20).toString('hex');
 		user.resetPasswordToken = resetToken;
 		user.resetPasswordExpires = Date.now() + 3600000;
 		await user.save();
 
-		// send reset password mail
 		await emailService.sendPasswordResetEmail(email, user.resetPasswordToken);
 
 		return res
 			.status(200)
 			.json({ message: 'Password reset instructions sent to email' });
 	},
+
 	resetPassword: async (req, res) => {
-		// Implementation for reset password
 		const { token, password } = req.body;
 		if (!token || !password) {
 			return res

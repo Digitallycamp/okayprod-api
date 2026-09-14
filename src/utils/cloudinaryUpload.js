@@ -26,16 +26,11 @@ const uploadBuffer = (buffer, options = {}) => {
 	});
 };
 
-/**
- * Deletes an image from Cloudinary by its public_id.
- * Safe to call with a falsy publicId — it just no-ops.
- */
 const deleteFromCloudinary = async (publicId) => {
 	if (!publicId) return;
 	try {
 		await cloudinary.uploader.destroy(publicId);
 	} catch (err) {
-		// Don't let cleanup failure break the main flow
 		console.error('Error deleting from Cloudinary:', err);
 	}
 };

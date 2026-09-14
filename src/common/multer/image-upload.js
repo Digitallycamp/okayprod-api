@@ -1,13 +1,6 @@
 const multer = require('multer');
-
-// Memory storage — files never touch disk.
-// The buffer lives on req.file.buffer for us to stream to Cloudinary.
 const storage = multer.memoryStorage();
-
-// 2MB — matches the frontend's advertised limit.
 const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
-
-// Images only. No PDFs — this is for logos/avatars.
 const ALLOWED_MIME_TYPES = [
 	'image/jpeg',
 	'image/jpg',

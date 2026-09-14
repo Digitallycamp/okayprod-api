@@ -1,40 +1,27 @@
 const User = require('../user/user.model.js');
 
 const securityController = {
-	/**
-	 * POST /api/v1/security/change-password
-	 * Body: { currentPassword, newPassword, confirmPassword }
-	 * Uses req.session.user.id to identify the authenticated user.
-	 */
 	changePassword: async (req, res) => {
 		try {
 			const { currentPassword, newPassword, confirmPassword } = req.body;
-
-			// Basic presence validation
 			if (!currentPassword || !newPassword || !confirmPassword) {
 				return res.status(400).json({
 					success: false,
 					message: 'All fields are required',
 				});
 			}
-
-			// New password match check (defense in depth; frontend also checks)
 			if (newPassword !== confirmPassword) {
 				return res.status(400).json({
 					success: false,
 					message: 'New password and confirm password do not match',
 				});
 			}
-
-			// Length validation
 			if (newPassword.length < 8) {
 				return res.status(400).json({
 					success: false,
 					message: 'New password must be at least 8 characters',
 				});
 			}
-
-			// Find authenticated user from the session — NEVER trust a client-supplied id
 			const user = await User.findById(req.session.user.id);
 
 			if (!user) {
@@ -43,8 +30,6 @@ const securityController = {
 					message: 'User not found',
 				});
 			}
-
-			// Verify current password using the existing model method
 			const isCurrentPasswordValid = await user.comparePassword(
 				currentPassword
 			);
@@ -55,16 +40,12 @@ const securityController = {
 					message: 'Current password is incorrect',
 				});
 			}
-
-			// Prevent reuse of the same password
 			if (currentPassword === newPassword) {
 				return res.status(400).json({
 					success: false,
 					message: 'New password must be different from the current password',
 				});
 			}
-
-			// Assign the new password — the pre('save') hook hashes it
 			user.password = newPassword;
 			await user.save();
 
@@ -81,10 +62,6 @@ const securityController = {
 		}
 	},
 
-	/**
-	 * GET /api/v1/security/2fa
-	 * Returns the authenticated user's 2FA state.
-	 */
 	get2FA: async (req, res) => {
 		try {
 			const user = await User.findById(req.session.user.id).select(
@@ -114,16 +91,9 @@ const securityController = {
 		}
 	},
 
-	/**
-	 * PATCH /api/v1/security/2fa
-	 * Body: { twoFactorEnabled: boolean }
-	 * Updates the authenticated user's 2FA state.
-	 */
 	update2FA: async (req, res) => {
 		try {
 			const { twoFactorEnabled } = req.body;
-
-			// Strict boolean validation — do not coerce arbitrary input
 			if (typeof twoFactorEnabled !== 'boolean') {
 				return res.status(400).json({
 					success: false,

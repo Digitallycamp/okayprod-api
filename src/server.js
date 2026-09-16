@@ -13,6 +13,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./utils/swagger.json');
 const connectDb = require('./common/db/connetDb.js');
 const productRouter = require('./module/products/product.route.js');
+const errorMiddleware = require('./common/middleware/error.middleware.js');
 
 const port = process.env.PORT || 8000;
 
@@ -65,3 +66,5 @@ app.use((err, req, res, next) => {
 	console.error(err.stack);
 	res.status(500).json({ message: 'Internal Server Error' });
 });
+
+app.use(errorMiddleware);

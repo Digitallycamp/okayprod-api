@@ -1,7 +1,7 @@
 const transactionServices = require('./transaction.services.js');
 
 const transactionController = {
-    createTransaction: async (req, res) => {
+	createTransaction: async (req, res, next) => {
 		try {
 			const userId = req.session.user.id;
 
@@ -18,14 +18,11 @@ const transactionController = {
 			});
 		} catch (error) {
 			console.error('Error creating transaction:', error);
-
-			return res.status(500).json({
-				success: false,
-				message: 'Failed to create transaction',
-			});
+			return next(error);
 		}
 	},
-	getTransactions: async (req, res) => {
+
+	getTransactions: async (req, res, next) => {
 		try {
 			const userId = req.session.user.id;
 
@@ -36,7 +33,7 @@ const transactionController = {
 				endDate = '',
 				page = 1,
 				limit = 6,
-			} = req.query;
+			} = req.validatedQuery || req.query;
 
 			const result = await transactionServices.getTransactions({
 				userId,
@@ -48,29 +45,32 @@ const transactionController = {
 				limit: Number(limit),
 			});
 
+			const hasData =
+				result.transactions &&
+				result.transactions.length > 0;
+
 			return res.status(200).json({
 				success: true,
-				message: 'Transactions fetched successfully',
-				data: result,
+				message: hasData
+					? 'Transactions fetched successfully'
+					: 'No transactions found',
+				data: result.transactions,
+				pagination: result.pagination,
 			});
 		} catch (error) {
 			console.error('Error fetching transactions:', error);
-
-			return res.status(500).json({
-				success: false,
-				message: 'Failed to fetch transactions',
-			});
+			return next(error);
 		}
 	},
 
-	getTransactionStats: async (req, res) => {
+	getTransactionStats: async (req, res, next) => {
 		try {
 			const userId = req.session.user.id;
 
 			const {
 				startDate = '',
 				endDate = '',
-			} = req.query;
+			} = req.validatedQuery || req.query;
 
 			const result =
 				await transactionServices.getTransactionStats({
@@ -90,10 +90,7 @@ const transactionController = {
 				error
 			);
 
-			return res.status(500).json({
-				success: false,
-				message: 'Failed to fetch transaction statistics',
-			});
+			return next(error);
 		}
 	},
 };

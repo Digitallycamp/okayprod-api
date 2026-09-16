@@ -4,7 +4,7 @@ const {
 	deleteFromCloudinary,
 } = require('../../utils/cloudinaryUpload.js');
 
-// Fields the authenticated user is allowed to update via the API.
+
 const EDITABLE_FIELDS = [
 	'primaryBrandColor',
 	'announcementBar',
@@ -73,7 +73,7 @@ const storefrontController = {
 		}
 	},
 
-	// NEW: Logo upload
+
 	updateLogo: async (req, res) => {
 		try {
 			const userId = req.session.user.id;
@@ -93,12 +93,12 @@ const storefrontController = {
 				});
 			}
 
-			// Delete previous logo from Cloudinary (if any) before replacing.
+
 			if (storefront.logoPublicId) {
 				await deleteFromCloudinary(storefront.logoPublicId);
 			}
 
-			// Upload new file
+
 			const result = await uploadBuffer(req.file.buffer, {
 				folder: `okayprod/storefronts/${userId}`,
 			});
@@ -115,7 +115,7 @@ const storefrontController = {
 		} catch (error) {
 			console.error('Error uploading logo:', error);
 
-			// Multer size limit produces a MulterError with this code
+
 			if (error.code === 'LIMIT_FILE_SIZE') {
 				return res.status(400).json({
 					success: false,
@@ -123,7 +123,6 @@ const storefrontController = {
 				});
 			}
 
-			// fileFilter rejections arrive as a generic Error
 			return res.status(400).json({
 				success: false,
 				message: error.message || 'Failed to upload logo',

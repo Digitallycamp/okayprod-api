@@ -8,7 +8,6 @@ const ProfileRouter = express.Router();
 ProfileRouter.get('/me', auth, profileController.getProfile);
 ProfileRouter.patch('/me', auth, profileController.updateProfile);
 
-// Avatar upload — one file, field name "avatar"
 ProfileRouter.patch(
 	'/avatar',
 	auth,

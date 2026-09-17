@@ -8,7 +8,6 @@ const storefrontRouter = express.Router();
 storefrontRouter.get('/', auth, storefrontController.getStorefront);
 storefrontRouter.patch('/', auth, storefrontController.updateStorefront);
 
-// Logo upload — one file, field name "logo"
 storefrontRouter.patch(
 	'/logo',
 	auth,

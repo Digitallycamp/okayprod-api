@@ -7,7 +7,6 @@ const { createProductSchema } = require('./schema');
 const productRouter = express.Router();
 productRouter.post(
 	'/create',
-	// upload.array('file', 5),
 	upload.fields([
 		{ name: 'cover_image', maxCount: 1 },
 		{ name: 'digital_asset_file', maxCount: 1 },

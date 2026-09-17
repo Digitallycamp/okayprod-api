@@ -4,7 +4,6 @@ const {
 	deleteFromCloudinary,
 } = require('../../utils/cloudinaryUpload.js');
 
-// Whitelist — never allow `user`, `avatar`, or `avatarPublicId` to be set via PATCH /profile/me
 const EDITABLE_FIELDS = ['firstName', 'lastName', 'email', 'website', 'bio'];
 
 const profileController = {
@@ -68,7 +67,7 @@ const profileController = {
 		}
 	},
 
-	// NEW: Avatar upload
+
 	updateAvatar: async (req, res) => {
 		try {
 			const userId = req.session.user.id;

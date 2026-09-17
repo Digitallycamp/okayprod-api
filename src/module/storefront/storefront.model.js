@@ -13,7 +13,7 @@ const storefrontSchema = new mongoose.Schema(
 			type: String,
 			default: null,
 		},
-		// NEW: Cloudinary public_id — used to delete the old image on replace
+		
 		logoPublicId: {
 			type: String,
 			default: null,

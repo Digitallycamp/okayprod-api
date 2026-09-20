@@ -1,6 +1,5 @@
-// body, query, param
-
-// example.com/post?published=true&deleted=null&limit=10&page=1
+const { StatusCodes } = require('http-status-codes');
+const { ApiError } = require('./error.middleware.js');
 
 const validate = (schema, property = 'body') => {
 	return (req, res, next) => {
@@ -8,16 +7,20 @@ const validate = (schema, property = 'body') => {
 			abortEarly: false,
 			stripUnknown: true,
 		});
+
 		if (error) {
 			const errors = error.details.map((detail) => ({
 				field: detail.path.join('.'),
 				message: detail.message.replace(/["]/g, ''),
 			}));
-			return res.status(400).json({
-				success: false,
-				message: 'Validation faild',
-				errors,
-			});
+
+			return next(
+				new ApiError(
+					StatusCodes.BAD_REQUEST,
+					'Validation failed',
+					errors
+				)
+			);
 		}
 
 		req[property] = value;

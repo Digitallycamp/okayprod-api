@@ -1,13 +1,13 @@
 const transactionRepository = require('./transaction.repository.js');
 
 const transactionServices = {
-    createTransaction: async ({ userId, transactionData }) => {
+	createTransaction: async ({ userId, transactionData }) => {
 		return await transactionRepository.createTransaction({
 			userId,
 			transactionData,
 		});
 	},
-    
+
 	getTransactions: async ({
 		userId,
 		search,
@@ -29,19 +29,12 @@ const transactionServices = {
 
 		const transactions = result.transactions.map((transaction) => ({
 			id: transaction.orderId,
-
 			customer: transaction.customer.name,
-
 			email: transaction.customer.email,
-
 			initials: transaction.customer.initials,
-
 			image: transaction.customer.image,
-
 			product: transaction.product.name,
-
 			type: transaction.product.type,
-
 			date: new Date(transaction.transactionDate).toLocaleDateString(
 				'en-US',
 				{
@@ -50,7 +43,6 @@ const transactionServices = {
 					year: 'numeric',
 				}
 			),
-
 			time: new Date(transaction.transactionDate).toLocaleTimeString(
 				'en-US',
 				{
@@ -59,13 +51,13 @@ const transactionServices = {
 					hour12: false,
 				}
 			),
-
 			amount: transaction.amount,
-
 			status: transaction.status,
 		}));
 
 		const totalPages = Math.ceil(result.total / limit);
+
+		const hasData = transactions.length > 0;
 
 		return {
 			transactions,
@@ -75,6 +67,9 @@ const transactionServices = {
 				total: result.total,
 				totalPages,
 			},
+			message: hasData
+				? 'Transactions fetched successfully'
+				: 'No transactions found',
 		};
 	},
 

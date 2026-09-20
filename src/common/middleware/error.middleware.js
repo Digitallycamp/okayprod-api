@@ -1,3 +1,18 @@
+const { StatusCodes } = require('http-status-codes');
+
+class ApiError extends Error {
+	constructor(
+		statusCode,
+		message,
+		errors = []
+	) {
+		super(message);
+		this.statusCode = statusCode;
+		this.errors = errors;
+		this.name = 'ApiError';
+	}
+}
+
 const errorMiddleware = (err, req, res, next) => {
 	console.error('Global Error:', err);
 
@@ -6,41 +21,53 @@ const errorMiddleware = (err, req, res, next) => {
 	}
 
 	if (err.name === 'ValidationError') {
-		return res.status(400).json({
-			success: false,
-			message: 'Validation failed',
-			error: err.message,
-		});
+		err = new ApiError(
+			StatusCodes.BAD_REQUEST,
+			'Validation failed',
+			[]
+		);
 	}
 
 	if (err.name === 'CastError') {
-		return res.status(400).json({
-			success: false,
-			message: 'Invalid data format',
-			error: err.message,
-		});
+		err = new ApiError(
+			StatusCodes.BAD_REQUEST,
+			'Invalid data format',
+			[]
+		);
 	}
 
-	if (err.name === 'MongoServerError' && err.code === 11000) {
-		return res.status(409).json({
-			success: false,
-			message: 'Duplicate data',
-			error: err.message,
-		});
+	if (
+		err.name === 'MongoServerError' &&
+		err.code === 11000
+	) {
+		err = new ApiError(
+			StatusCodes.CONFLICT,
+			'Duplicate data',
+			[]
+		);
 	}
 
 	if (err.name === 'MongoNetworkError') {
-		return res.status(503).json({
-			success: false,
-			message: 'Database connection error',
-			error: err.message,
-		});
+		err = new ApiError(
+			StatusCodes.SERVICE_UNAVAILABLE,
+			'Database connection error',
+			[]
+		);
 	}
 
-	return res.status(err.statusCode || 500).json({
+	const statusCode =
+		err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+
+	return res.status(statusCode).json({
 		success: false,
 		message: err.message || 'Internal server error',
+		...(err.errors?.length > 0 && {
+			errors: err.errors,
+		}),
 	});
 };
 
-module.exports = errorMiddleware;
+module.exports = {
+	errorMiddleware,
+	ApiError,
+};

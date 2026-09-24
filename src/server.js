@@ -8,11 +8,13 @@ const app = require('./app.js');
 const authRouter = require('./module/auth/auth.routes.js');
 const profileRouter = require('./module/profile/profile.routes.js');
 const storefrontRouter = require('./module/storefront/storefront.routes.js');
+const transactionRouter = require('./module/transaction/transaction.routes.js');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./utils/swagger.json');
 
 const connectDb = require('./common/db/connetDb.js');
 const productRouter = require('./module/products/product.route.js');
+const { errorMiddleware } = require('./common/middleware/error.middleware.js');
 
 const port = process.env.PORT || 8000;
 
@@ -48,6 +50,8 @@ app.use(
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/storefront', storefrontRouter);
+app.use('/api/v1/profile', profileRouter);
+app.use('/api/v1/transactions', transactionRouter);
 app.use('/api/v1/product', productRouter);
 
 const startServer = async () => {
@@ -63,3 +67,5 @@ app.use((err, req, res, next) => {
 	console.error(err.stack);
 	res.status(500).json({ message: 'Internal Server Error' });
 });
+
+app.use(errorMiddleware);

@@ -1,4 +1,3 @@
-// user and admin or admin , supper ['admin'. 'user']
 const permisions = (permission = []) => {
 	(req, res, next) => {
 		const role = req.session.user.role;

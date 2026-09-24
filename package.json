@@ -18,12 +18,15 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "geoip-lite": "^1.4.10",
     "http-status-codes": "^2.3.0",
     "joi": "^18.2.5",
     "mongoose": "^9.6.2",
-    "multer": "^2.3.0",
     "nodemailer": "^8.0.10",
-    "swagger-ui-express": "^5.0.1"
+    "joi": "^18.2.5",
+    "multer": "^2.3.0",
+    "swagger-ui-express": "^5.0.1",
+    "ua-parser-js": "^2.0.10"
   },
   "devDependencies": {
     "dotenv": "^17.4.2",

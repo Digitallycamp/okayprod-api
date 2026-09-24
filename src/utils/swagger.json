@@ -90,6 +90,67 @@
 				}
 			}
 		},
+
+		"/api/v1/storefront": {
+			"get": {
+				"tags": ["Storefront"],
+				"description": "Get the authenticated user's storefront settings",
+				"responses": {
+					"200": {
+						"description": "Storefront retrieved successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": {
+											"type": "boolean"
+										},
+										"message": {
+											"type": "string"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"_id": {
+													"type": "string"
+												},
+												"user": {
+													"type": "string"
+												},
+												"logo": {
+													"type": "string",
+													"nullable": true
+												},
+												"primaryBrandColor": {
+													"type": "string"
+												},
+												"announcementBar": {
+													"type": "boolean"
+												},
+												"messageContent": {
+													"type": "string"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"404": {
+						"description": "Storefront not found for this user"
+					}
+				}
+			},
+			"patch": {
+				"tags": ["Storefront"],
+				"description": "Update the authenticated user's storefront settings",
+				"requestBody": {
+					"description": "Storefront fields to update",
 		"/api/v1/transactions": {
 			"post": {
 				"tags": ["Transactions"],
@@ -100,6 +161,15 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
+								"properties": {
+									"primaryBrandColor": {
+										"type": "string"
+									},
+									"announcementBar": {
+										"type": "boolean"
+									},
+									"messageContent": {
+										"type": "string"
 								"required": [
 									"orderId",
 									"customer",
@@ -175,6 +245,27 @@
 					}
 				},
 				"responses": {
+					"200": {
+						"description": "Storefront updated successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": {
+											"type": "boolean"
+										},
+										"message": {
+											"type": "string"
+										},
+										"data": {
+											"type": "object"
+										}
+									}
+								}
+							}
+						}
+					},
 					"201": {
 						"description": "Transaction created successfully"
 					},
@@ -269,6 +360,63 @@
 					"401": {
 						"description": "Unauthorized"
 					},
+					"404": {
+						"description": "Storefront not found for this user"
+					}
+				}
+			}
+		},
+		"/api/v1/storefront/logo": {
+			"patch": {
+				"tags": ["Storefront"],
+				"description": "Upload a logo for the authenticated user's storefront. Accepts multipart/form-data with a field named 'logo'.",
+				"requestBody": {
+					"description": "Logo file",
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"required": ["logo"],
+								"properties": {
+									"logo": {
+										"type": "string",
+										"format": "binary"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Logo updated successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": {
+											"type": "boolean"
+										},
+										"message": {
+											"type": "string"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"logo": {
+													"type": "string"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "No file provided, invalid file type, or file too large"
 					"500": {
 						"description": "Internal server error"
 					}
@@ -309,6 +457,8 @@
 					"401": {
 						"description": "Unauthorized"
 					},
+					"404": {
+						"description": "Storefront not found for this user"
 					"500": {
 						"description": "Internal server error"
 					}

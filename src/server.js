@@ -6,11 +6,12 @@ const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
 const app = require('./app.js');
 const authRouter = require('./module/auth/auth.routes.js');
-const profileRouter = require('./module/profle/profile.routes.js');
+const profileRouter = require('./module/profile/profile.routes.js');
+const storefrontRouter = require('./module/storefront/storefront.routes.js');
 const transactionRouter = require('./module/transaction/transaction.routes.js');
-
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./utils/swagger.json');
+
 const connectDb = require('./common/db/connetDb.js');
 const productRouter = require('./module/products/product.route.js');
 const { errorMiddleware } = require('./common/middleware/error.middleware.js');
@@ -21,7 +22,7 @@ app.use(
 	cors({
 		origin: ['http://localhost:5173', 'http://localhost:5174'],
 		credentials: true,
-		methods: ['GET', 'POST', 'PUT', 'DELETE'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE' , 'PATCH'],
 	})
 );
 
@@ -34,21 +35,21 @@ app.use(
 		saveUninitialized: false,
 		store: MongoStore.create({
 			mongoUrl: process.env.MONGO_URI,
-			ttl: 24 * 60 * 60 * 1000, // Session expiration time in seconds (1 day)
+			ttl: 24 * 60 * 60 * 1000, 
 		}),
 		cookie: {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production' ? true : false, // Set to true if using HTTPS in production
-			maxAge: 1000 * 24 * 60 * 60, // Session expires after 1 day
-			sameSite: 'lax', // Required for cross-site cookies
-			path: '/', // Cookie is valid for the entire site
+			secure: process.env.NODE_ENV === 'production' ? true : false, 
+			maxAge: 1000 * 24 * 60 * 60,
+			sameSite: 'lax',
+			path: '/',
 		},
 	})
 );
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-//routes heer
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/storefront', storefrontRouter);
 app.use('/api/v1/profile', profileRouter);
 app.use('/api/v1/transactions', transactionRouter);
 app.use('/api/v1/product', productRouter);

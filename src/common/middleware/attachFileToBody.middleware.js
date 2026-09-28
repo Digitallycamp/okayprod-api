@@ -1,9 +1,5 @@
 const cloudinary = require('../cloudinary');
 
-/**
- * Upload a single Multer file object (with a .buffer) to Cloudinary.
- * Returns { url, public_id }.
- */
 const uploadToCloudinary = (file) => {
 	return new Promise((resolve, reject) => {
 		if (!file || !file.buffer) {
@@ -20,32 +16,16 @@ const uploadToCloudinary = (file) => {
 	});
 };
 
-/**
- * Middleware: uploads any files present on req.files to Cloudinary and
- * attaches the resulting URLs (and public_ids) to req.body.
- *
- * Expects Multer to be configured with `.fields([...])` so that
- * `req.files` is an object keyed by field name.
- * Example usage:
- *   upload.fields([
- *     { name: 'cover_image', maxCount: 1 },
- *     { name: 'digital_asset_file', maxCount: 1 },
- *   ])
- */
+
 const attachFilesToBody = async (req, res, next) => {
 	try {
 		if (!req.files) {
 			return next();
 		}
 
-		// req.files can be an array (upload.array) or object (upload.fields).
-		// This middleware expects the object shape (upload.fields), but we
-		// normalise to be safe.
 		const filesMap = Array.isArray(req.files)
 			? {}
 			: req.files;
-
-		// Handle known product fields explicitly
 		if (filesMap.cover_image && filesMap.cover_image[0]) {
 			const result = await uploadToCloudinary(filesMap.cover_image[0]);
 			req.body.cover_image = result.url;

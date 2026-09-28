@@ -11,28 +11,23 @@ const profileSchema = new mongoose.Schema(
 		},
 		firstName: {
 			type: String,
-			default: '',
 			trim: true,
 		},
 		lastName: {
 			type: String,
-			default: '',
 			trim: true,
 		},
 		email: {
 			type: String,
-			default: '',
 			trim: true,
 			lowercase: true,
 		},
 		website: {
 			type: String,
-			default: '',
 			trim: true,
 		},
 		bio: {
 			type: String,
-			default: '',
 			maxlength: 160,
 			trim: true,
 		},
@@ -40,7 +35,6 @@ const profileSchema = new mongoose.Schema(
 			type: String,
 			default: null,
 		},
-		// NEW: Cloudinary public_id — used to delete the old image on replace
 		avatarPublicId: {
 			type: String,
 			default: null,

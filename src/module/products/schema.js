@@ -27,4 +27,23 @@ const createProductSchema = Joi.object({
 	is_published: Joi.boolean(),
 });
 
-module.exports = { createProductSchema };
+const changePasswordSchema = Joi.object({
+	currentPassword: Joi.string().required().messages({
+		'string.empty': 'Current password is required',
+		'any.required': 'Current password is required',
+	}),
+	newPassword: Joi.string().min(8).required().messages({
+		'string.empty': 'New password is required',
+		'string.min': 'New password must be at least 8 characters',
+		'any.required': 'New password is required',
+	}),
+	confirmPassword: Joi.string()
+		.valid(Joi.ref('newPassword'))
+		.required()
+		.messages({
+			'any.only': 'New password and confirm password do not match',
+			'any.required': 'Confirm password is required',
+		}),
+});
+
+module.exports = { createProductSchema,changePasswordSchema };

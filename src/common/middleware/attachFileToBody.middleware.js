@@ -1,30 +1,57 @@
 const cloudinary = require('../cloudinary');
 
+const uploadToCloudinary = (file) => {
+	return new Promise((resolve, reject) => {
+		cloudinary.uploader.upload_stream(
+			{
+				resource_type: 'auto',
+			},
+			(error, result) => {
+				if (error) {
+					return reject(error);
+				}
+
+				return resolve({
+					url: result.secure_url,
+					public_id: result.public_id,
+				});
+			}
+		).end(file.buffer);
+	});
+};
+
 const attachFilesToBody = async (req, res, next) => {
 	try {
-		if (req.files && req.files.length > 0) {
-			const uploadedPromise = req.files.map((file) => {
-				return new Promise((resolve, reject) => {
-					cloudinary.uploader
-						.upload_stream({ resource_type: 'auto' }, (error, result) => {
-							if (error) return reject(error);
-							resolve({ url: result.secure_url, public_id: result.public_id });
-						})
-						.end(file.buffer);
-				});
-			});
+		if (req.files && Object.keys(req.files).length > 0) {
+			if (req.files.cover_image?.length > 0) {
+				const uploadedCoverImages =
+					await Promise.all(
+						req.files.cover_image.map(
+							(file) =>
+								uploadToCloudinary(file)
+						)
+					);
 
-			const uploadedFiles = await Promise.all(uploadedPromise);
-			// req.body.file = uploadedFiles;
-			if (req.files.cover_image) {
-				req.body.cover_image = await uploadToCloudinary(req.files.cover_image);
+				req.body.cover_image =
+					uploadedCoverImages;
 			}
-			if (req.files.digital_asset_file) {
-				req.body.digital_asset_file = await uploadToCloudinary(
-					req.files.digital_asset_file
-				);
+
+			if (
+				req.files.digital_asset_file?.length > 0
+			) {
+				const uploadedDigitalAssets =
+					await Promise.all(
+						req.files.digital_asset_file.map(
+							(file) =>
+								uploadToCloudinary(file)
+						)
+					);
+
+				req.body.digital_asset_file =
+					uploadedDigitalAssets;
 			}
 		}
+
 		next();
 	} catch (err) {
 		next(err);

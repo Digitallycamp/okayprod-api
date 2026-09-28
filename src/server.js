@@ -51,7 +51,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/profile', profileRouter);
 app.use('/api/v1/transactions', transactionRouter);
-app.use('/api/v1/product', productRouter);
+app.use('/api/v1/products', productRouter);
 
 const startServer = async () => {
 	await connectDb();

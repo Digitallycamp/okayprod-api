@@ -1,5 +1,6 @@
 const Joi = require('joi');
 
+
 const uploadedFileSchema = Joi.object({
 	url: Joi.string().uri().required(),
 	public_id: Joi.string().trim().required(),

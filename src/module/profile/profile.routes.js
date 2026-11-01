@@ -1,7 +1,7 @@
 const express = require('express');
 const profileController = require('./profile.controller.js');
 const auth = require('../../common/middleware/auth.middleware.js');
-const upload = require('../../common/multer/image-upload.js');
+const { upload } = require('../../common/multer/image-upload.js');
 
 const ProfileRouter = express.Router();
 

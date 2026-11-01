@@ -7,6 +7,8 @@ const { MongoStore } = require('connect-mongo');
 const app = require('./app.js');
 const authRouter = require('./module/auth/auth.routes.js');
 const profileRouter = require('./module/profile/profile.routes.js');
+const securityRouter = require('./module/security/security.routes.js');
+const sessionRouter = require('./module/session/session.routes.js');
 const storefrontRouter = require('./module/storefront/storefront.routes.js');
 const transactionRouter = require('./module/transaction/transaction.routes.js');
 const swaggerUi = require('swagger-ui-express');
@@ -49,6 +51,8 @@ app.use(
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/profile', profileRouter);
+app.use('/api/v1/security/sessions', sessionRouter);
 app.use('/api/v1/storefront', storefrontRouter);
 app.use('/api/v1/profile', profileRouter);
 app.use('/api/v1/transactions', transactionRouter);

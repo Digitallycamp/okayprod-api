@@ -4,6 +4,7 @@ const {
 	deleteFromCloudinary,
 } = require('../../utils/cloudinaryUpload.js');
 
+
 const EDITABLE_FIELDS = ['firstName', 'lastName', 'email', 'website', 'bio'];
 
 const profileController = {

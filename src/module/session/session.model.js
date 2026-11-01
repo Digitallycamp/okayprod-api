@@ -30,6 +30,7 @@ const sessionTrackSchema = new mongoose.Schema(
 			version: { type: String, default: '' },
 		},
 
+
 		device: {
 			type: { type: String, default: 'desktop' }, 
 			vendor: { type: String, default: '' },

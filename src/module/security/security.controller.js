@@ -1,15 +1,19 @@
 const securityService = require('./security.service.js');
 
 const securityController = {
+
 	changePassword: async (req, res, next) => {
+
 		try {
 			const { currentPassword, newPassword } = req.body;
+
 
 			await securityService.changePassword({
 				userId: req.session.user.id,
 				currentPassword,
 				newPassword,
 			});
+
 
 			return res.status(200).json({
 				success: true,
@@ -20,7 +24,10 @@ const securityController = {
 		}
 	},
 
+
 	get2FA: async (req, res, next) => {
+
+
 		try {
 			const result = await securityService.get2FA(req.session.user.id);
 

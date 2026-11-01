@@ -14,6 +14,7 @@ const storefrontSchema = new mongoose.Schema(
 			default: null,
 		},
 		
+
 		logoPublicId: {
 			type: String,
 			default: null,

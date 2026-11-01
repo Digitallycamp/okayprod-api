@@ -68,7 +68,7 @@ const profileController = {
 		}
 	},
 
-	// NEW: Avatar upload
+
 	updateAvatar: async (req, res) => {
 		try {
 			const userId = req.session.user.id;

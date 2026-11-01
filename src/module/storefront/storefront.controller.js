@@ -4,6 +4,7 @@ const {
 	deleteFromCloudinary,
 } = require('../../utils/cloudinaryUpload.js');
 
+
 const EDITABLE_FIELDS = [
 	'primaryBrandColor',
 	'announcementBar',
@@ -72,6 +73,7 @@ const storefrontController = {
 		}
 	},
 
+
 	updateLogo: async (req, res) => {
 		try {
 			const userId = req.session.user.id;
@@ -90,6 +92,7 @@ const storefrontController = {
 					message: 'Storefront not found for this user',
 				});
 			}
+
 
 			if (storefront.logoPublicId) {
 				await deleteFromCloudinary(storefront.logoPublicId);
@@ -111,6 +114,7 @@ const storefrontController = {
 			});
 		} catch (error) {
 			console.error('Error uploading logo:', error);
+
 
 			if (error.code === 'LIMIT_FILE_SIZE') {
 				return res.status(400).json({

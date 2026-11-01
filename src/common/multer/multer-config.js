@@ -7,8 +7,6 @@ const allowedTypes = [
 	'image/jpeg',
 	'image/jpg',
 	'image/png',
-	'image/svg+xml',
-	'image/webp',
 ];
 
 const fileFilter = (req, file, cb) => {
@@ -17,7 +15,7 @@ const fileFilter = (req, file, cb) => {
 	} else {
 		cb(
 			new Error(
-				'Invalid file type. Allowed: PDF, JPEG, JPG, PNG, SVG, WEBP.'
+				'Invalid file type. Allowed: PDF, JPEG, JPG .'
 			),
 			false
 		);

@@ -12,6 +12,7 @@ const securityRouter = express.Router();
 securityRouter.post( '/change-password', auth, 
     validate(changePasswordSchema), securityController.changePassword );
 
+
 securityRouter.get('/2fa', auth, securityController.get2FA);
 
 securityRouter.patch(

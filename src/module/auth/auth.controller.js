@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const { UAParser } = require('ua-parser-js');
 const SessionTrack = require('../session/session.model.js');
 const geoip = require('geoip-lite');
+const Storefront = require('../storefront/storefront.model.js');
 
 const createSessionTrack = async (req, userId) => {
 	try {
@@ -32,8 +33,8 @@ const createSessionTrack = async (req, userId) => {
 			},
 			location: {
 				country: geo.country || '',
-				region:  geo.region  || '',
-				city:    geo.city    || '',
+				region: geo.region || '',
+				city: geo.city || '',
 			},
 			lastSeenAt: new Date(),
 		});
@@ -42,8 +43,18 @@ const createSessionTrack = async (req, userId) => {
 	}
 };
 
+const createStorefrontForUser = async (userId) => {
+	try {
+		const existing = await Storefront.findOne({ user: userId });
+		if (existing) return existing;
 
-
+		const storefront = await Storefront.create({ user: userId });
+		return storefront;
+	} catch (err) {
+		console.error('Error creating Storefront for user:', userId, err);
+		return null;
+	}
+};
 
 const authController = {
 	register: async (req, res) => {
@@ -59,6 +70,8 @@ const authController = {
 
 			const newUser = new User({ email, password });
 			await newUser.save();
+			await createStorefrontForUser(newUser._id);
+
 			return res.status(201).json({ message: 'User registered successfully' });
 		} catch (error) {
 			console.error('Error during registration:', error);
@@ -114,7 +127,6 @@ const authController = {
 			const googleUser = await response.json();
 			let user = await User.findOne({ email: googleUser.email });
 
-			// Only create a Storefront if this is a BRAND NEW user
 			let isNewUser = false;
 
 			if (!user) {
@@ -128,6 +140,9 @@ const authController = {
 				isNewUser = true;
 			}
 
+			if (isNewUser) {
+				await createStorefrontForUser(user._id);
+			}
 
 			req.session.regenerate((err) => {
 				if (err) {

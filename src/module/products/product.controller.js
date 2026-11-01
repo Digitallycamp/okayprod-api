@@ -11,7 +11,7 @@ const productController = {
 
 		return res.status(201).json({
 			success: true,
-			message: 'Product created successfully',
+			message: 'Product created successfuly',
 			data: product,
 		});
 	},

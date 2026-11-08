@@ -2,22 +2,48 @@ const User = require('../user/user.model.js');
 const emailService = require('../email/services/email.service.js');
 const crypto = require('crypto');
 const { UAParser } = require('ua-parser-js');
-const Storefront = require('../storefront/storefront.model.js');
+const SessionTrack = require('../session/session.model.js');
+const geoip = require('geoip-lite');
 
-
-const createStorefrontForUser = async (userId) => {
+const createSessionTrack = async (req, userId) => {
 	try {
-		
-		const existing = await Storefront.findOne({ user: userId });
-		if (existing) return existing;
-
-		const storefront = await Storefront.create({ user: userId });
-		return storefront;
+		const ua = req.headers['user-agent'] || '';
+		const parser = new UAParser(ua);
+		const parsed = parser.getResult();
+		const deviceType = parsed.device.type || 'desktop';
+		const clientIp = req.ip || req.headers['x-forwarded-for'] || '';
+		const geo = geoip.lookup(clientIp) || {};
+		await SessionTrack.create({
+			userId,
+			sessionId: req.sessionID,
+			userAgent: ua,
+			browser: {
+				name: parsed.browser.name || 'Unknown',
+				version: parsed.browser.version || '',
+			},
+			os: {
+				name: parsed.os.name || 'Unknown',
+				version: parsed.os.version || '',
+			},
+			device: {
+				type: deviceType,
+				vendor: parsed.device.vendor || '',
+				model: parsed.device.model || '',
+			},
+			location: {
+				country: geo.country || '',
+				region:  geo.region  || '',
+				city:    geo.city    || '',
+			},
+			lastSeenAt: new Date(),
+		});
 	} catch (err) {
-		console.error('Error creating Storefront for user:', userId, err);
-		return null;
+		console.error('Error creating SessionTrack:', err);
 	}
 };
+
+
+
 
 const authController = {
 	register: async (req, res) => {
@@ -33,8 +59,6 @@ const authController = {
 
 			const newUser = new User({ email, password });
 			await newUser.save();
-			await createStorefrontForUser(newUser._id);
-
 			return res.status(201).json({ message: 'User registered successfully' });
 		} catch (error) {
 			console.error('Error during registration:', error);
@@ -66,7 +90,7 @@ const authController = {
 				email: user.email,
 			};
 
-			
+			await createSessionTrack(req, user._id);
 
 			return res.status(200).json({ message: 'Login successful' });
 		});
@@ -90,7 +114,7 @@ const authController = {
 			const googleUser = await response.json();
 			let user = await User.findOne({ email: googleUser.email });
 
-			
+			// Only create a Storefront if this is a BRAND NEW user
 			let isNewUser = false;
 
 			if (!user) {
@@ -104,10 +128,6 @@ const authController = {
 				isNewUser = true;
 			}
 
-
-			if (isNewUser) {
-				await createStorefrontForUser(user._id);
-			}
 
 			req.session.regenerate((err) => {
 				if (err) {
@@ -127,7 +147,7 @@ const authController = {
 						return res.status(500).json({ message: 'Internal server error' });
 					}
 
-					
+					await createSessionTrack(req, user._id);
 
 					return res.status(200).json({ message: 'Login successful' });
 				});

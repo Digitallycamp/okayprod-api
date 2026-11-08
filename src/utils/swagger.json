@@ -5,8 +5,8 @@
 		"summary": "This is an internal documentation for our team for all okayproduct api",
 		"version": "1.1.0",
 		"contact": {
-			"name": "Mr Wisdom",
-			"email": "team@okayproduct.com"
+			"name": "tutor",
+			"email": "team@okay.com"
 		},
 		"license": {
 			"name": "Apache 2.0"
@@ -345,6 +345,98 @@
 					"400": { "description": "Bad request" },
 					"401": { "description": "Unauthorized" },
 					"404": { "description": "Storefront not found for this user" },
+					"500": { "description": "Internal server error" }
+				}
+			}
+		},
+		"/api/v1/products/create": {
+			"post": {
+				"tags": ["Products"],
+				"description": "Create a new product with cover image and digital asset upload",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"required": [
+									"product_type",
+									"product_name",
+									"product_description",
+									"product_price",
+									"cover_image"
+								],
+								"properties": {
+									"product_type": {
+										"type": "string",
+										"enum": ["digital", "physical", "service"],
+										"description": "Type of product"
+									},
+									"product_name": {
+										"type": "string",
+										"minLength": 2,
+										"maxLength": 150,
+										"description": "Name of the product"
+									},
+									"product_description": {
+										"type": "string",
+										"minLength": 10,
+										"maxLength": 5000,
+										"description": "Description of the product"
+									},
+									"product_price": {
+										"type": "number",
+										"minimum": 0,
+										"description": "Price of the product"
+									},
+									"currency": {
+										"type": "string",
+										"default": "NGN",
+										"description": "Product currency"
+									},
+									"cover_image": {
+										"type": "string",
+										"format": "binary",
+										"description": "Product cover image. Maximum file size: 5 MB."
+									},
+									"digital_asset_file": {
+										"type": "string",
+										"format": "binary",
+										"description": "Digital product asset file. Maximum file size: 5 MB."
+									},
+									"is_store_preview": {
+										"type": "boolean",
+										"default": false,
+										"description": "Whether the product is visible in the storefront preview"
+									},
+									"is_published": {
+										"type": "boolean",
+										"default": true,
+										"description": "Whether the product is published"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Product created successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean", "example": true },
+										"message": { "type": "string", "example": "Product created successfully" },
+										"data": { "type": "object", "description": "Created product" }
+									}
+								}
+							}
+						}
+					},
+					"400": { "description": "Bad request or validation error" },
+					"401": { "description": "Unauthorized" },
 					"500": { "description": "Internal server error" }
 				}
 			}

@@ -1,9 +1,7 @@
 const SessionTrack = require('./session.model.js');
-
-const ACTIVE_THRESHOLD_MS = 60 * 1000; 
+const ACTIVE_THRESHOLD_MS = 60 * 1000;
 
 const sessionController = {
-
 	getSessions: async (req, res) => {
 		try {
 			const userId = req.session.user.id;
@@ -21,11 +19,10 @@ const sessionController = {
 
 				return {
 					id: track._id.toString(),
-					// Human-readable label built from parsed UA
 					device: `${track.browser.name} on ${track.os.name}${
 						track.os.version ? ` ${track.os.version}` : ''
 					}`,
-					deviceType: track.device.type, 
+					deviceType: track.device.type,
 					location: track.location?.city
                         ? `${track.location.city}, ${track.location.country}`
                         : 'Unknown location',
@@ -48,10 +45,8 @@ const sessionController = {
 			});
 		}
 	},
-
 	revokeSession: async (req, res) => {
 		try {
-
 			return res.status(200).json({
 				success: false,
 				message: 'Session revocation is not yet available',

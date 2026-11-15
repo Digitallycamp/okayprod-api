@@ -9,29 +9,24 @@ const sessionTrackSchema = new mongoose.Schema(
 			index: true,
 		},
 		sessionId: {
-
 			type: String,
 			required: true,
 			index: true,
 		},
-		
 		userAgent: {
 			type: String,
 			default: '',
 		},
-
 		browser: {
 			name: { type: String, default: 'Unknown' },
 			version: { type: String, default: '' },
 		},
-
 		os: {
 			name: { type: String, default: 'Unknown' },
 			version: { type: String, default: '' },
 		},
-
 		device: {
-			type: { type: String, default: 'desktop' }, 
+			type: { type: String, default: 'desktop' },
 			vendor: { type: String, default: '' },
 			model: { type: String, default: '' },
 		},
@@ -55,7 +50,6 @@ const sessionTrackSchema = new mongoose.Schema(
         },
 	}
 );
-
 sessionTrackSchema.index({ userId: 1, lastSeenAt: -1 });
 
 module.exports = mongoose.model('SessionTrack', sessionTrackSchema);

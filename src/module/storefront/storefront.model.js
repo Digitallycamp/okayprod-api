@@ -13,7 +13,7 @@ const storefrontSchema = new mongoose.Schema(
 			type: String,
 			default: null,
 		},
-
+		
 		logoPublicId: {
 			type: String,
 			default: null,

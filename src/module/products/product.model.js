@@ -77,6 +77,48 @@ const productSchema = new mongoose.Schema(
 			ref: 'User',
 			required: true,
 		},
+		compare_at_price: {
+			type: Number,
+			min: 0,
+		},
+		sku: {
+			type: String,
+			trim: true,
+		},
+		barcode: {
+			type: String,
+			trim: true,
+		},
+		weight: {
+			type: Number,
+			min: 0,
+		},
+		weight_unit: {
+			type: String,
+			enum: ['kg', 'g', 'lb', 'oz'],
+			default: 'kg',
+		},
+		dimensions_length: {
+			type: Number,
+			min: 0,
+		},
+		dimensions_width: {
+			type: Number,
+			min: 0,
+		},
+		dimensions_height: {
+			type: Number,
+			min: 0,
+		},
+		shipping_rate_type: {
+			type: String,
+			enum: ['calculated', 'flat'],
+			default: 'calculated',
+		},
+		category: {
+			type: String,
+			trim: true,
+		},
 	},
 	{
 		timestamps: true,

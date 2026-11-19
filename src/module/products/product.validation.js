@@ -1,6 +1,5 @@
 const Joi = require('joi');
 
-
 const uploadedFileSchema = Joi.object({
 	url: Joi.string().uri().required(),
 	public_id: Joi.string().trim().required(),
@@ -28,6 +27,10 @@ const createProductSchema = Joi.object({
 		.min(0)
 		.required(),
 
+	compare_at_price: Joi.number()
+		.min(0)
+		.optional(),
+
 	currency: Joi.string()
 		.trim()
 		.uppercase()
@@ -54,6 +57,60 @@ const createProductSchema = Joi.object({
 				.max(1)
 				.default([]),
 		}),
+
+	category: Joi.string().trim().optional().allow(''),
+	sku: Joi.string()
+		.trim()
+		.when('product_type', {
+			is: 'physical',
+			then: Joi.string().required(),
+			otherwise: Joi.string().optional().allow(''),
+		}),
+
+	barcode: Joi.string()
+		.trim()
+		.optional()
+		.allow(''),
+
+	weight: Joi.number()
+		.min(0)
+		.when('product_type', {
+			is: 'physical',
+			then: Joi.number().required(),
+			otherwise: Joi.number().optional(),
+		}),
+
+	weight_unit: Joi.string()
+		.valid('kg', 'g', 'lb', 'oz')
+		.default('kg'),
+
+	dimensions_length: Joi.number()
+		.min(0)
+		.when('product_type', {
+			is: 'physical',
+			then: Joi.number().required(),
+			otherwise: Joi.number().optional(),
+		}),
+
+	dimensions_width: Joi.number()
+		.min(0)
+		.when('product_type', {
+			is: 'physical',
+			then: Joi.number().required(),
+			otherwise: Joi.number().optional(),
+		}),
+
+	dimensions_height: Joi.number()
+		.min(0)
+		.when('product_type', {
+			is: 'physical',
+			then: Joi.number().required(),
+			otherwise: Joi.number().optional(),
+		}),
+
+	shipping_rate_type: Joi.string()
+		.valid('calculated', 'flat')
+		.default('calculated'),
 
 	is_store_preview: Joi.boolean()
 		.default(false),

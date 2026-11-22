@@ -6,8 +6,12 @@ const productRepository = {
 			...productData,
 			user: userId,
 		});
-
 		return product;
+	},
+
+	// NEW: Fetch all products for a user
+	getProductsByUser: async (userId) => {
+		return await Product.find({ user: userId }).sort({ createdAt: -1 });
 	},
 };
 

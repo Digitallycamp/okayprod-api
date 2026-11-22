@@ -4,6 +4,7 @@ const {
 	deleteFromCloudinary,
 } = require('../../utils/cloudinaryUpload.js');
 
+
 const EDITABLE_FIELDS = ['firstName', 'lastName', 'email', 'website', 'bio'];
 
 const profileController = {
@@ -67,7 +68,7 @@ const profileController = {
 		}
 	},
 
-
+	// NEW: Avatar upload
 	updateAvatar: async (req, res) => {
 		try {
 			const userId = req.session.user.id;

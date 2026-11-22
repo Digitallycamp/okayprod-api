@@ -7,6 +7,8 @@ const allowedTypes = [
 	'image/jpeg',
 	'image/jpg',
 	'image/png',
+	'image/svg+xml',
+	'image/webp',
 ];
 
 const fileFilter = (req, file, cb) => {
@@ -15,7 +17,7 @@ const fileFilter = (req, file, cb) => {
 	} else {
 		cb(
 			new Error(
-				'Invalid file type. Allowed: PDF, JPEG, JPG .'
+				'Invalid file type. Allowed: PDF, JPEG, JPG, PNG, SVG, WEBP.'
 			),
 			false
 		);
@@ -25,7 +27,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
 	storage,
 	fileFilter,
-	limits: { fileSize, },
+	limits: { fileSize },
 });
 
 module.exports = upload;

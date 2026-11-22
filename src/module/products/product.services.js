@@ -6,8 +6,12 @@ const productServices = {
 			userId,
 			productData,
 		});
-
 		return product;
+	},
+
+	// NEW
+	getProducts: async (userId) => {
+		return await productRepository.getProductsByUser(userId);
 	},
 };
 

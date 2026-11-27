@@ -24,31 +24,19 @@ const attachFilesToBody = async (req, res, next) => {
 	try {
 		if (req.files && Object.keys(req.files).length > 0) {
 			if (req.files.cover_image?.length > 0) {
-				const uploadedCoverImages =
-					await Promise.all(
-						req.files.cover_image.map(
-							(file) =>
-								uploadToCloudinary(file)
-						)
-					);
+				const uploadedCoverImages = await Promise.all(
+					req.files.cover_image.map((file) => uploadToCloudinary(file))
+				);
 
-				req.body.cover_image =
-					uploadedCoverImages;
+				req.body.cover_image = uploadedCoverImages;
 			}
 
-			if (
-				req.files.digital_asset_file?.length > 0
-			) {
-				const uploadedDigitalAssets =
-					await Promise.all(
-						req.files.digital_asset_file.map(
-							(file) =>
-								uploadToCloudinary(file)
-						)
-					);
+			if (req.files.digital_asset_file?.length > 0) {
+				const uploadedDigitalAssets = await Promise.all(
+					req.files.digital_asset_file.map((file) => uploadToCloudinary(file))
+				);
 
-				req.body.digital_asset_file =
-					uploadedDigitalAssets;
+				req.body.digital_asset_file = uploadedDigitalAssets;
 			}
 		}
 

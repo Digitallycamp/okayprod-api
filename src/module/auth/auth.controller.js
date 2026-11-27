@@ -2,12 +2,49 @@ const User = require('../user/user.model.js');
 const emailService = require('../email/services/email.service.js');
 const crypto = require('crypto');
 const { UAParser } = require('ua-parser-js');
+const SessionTrack = require('../session/session.model.js');
+const geoip = require('geoip-lite');
 const Storefront = require('../storefront/storefront.model.js');
 
+const createSessionTrack = async (req, userId) => {
+	try {
+		const ua = req.headers['user-agent'] || '';
+		const parser = new UAParser(ua);
+		const parsed = parser.getResult();
+		const deviceType = parsed.device.type || 'desktop';
+		const clientIp = req.ip || req.headers['x-forwarded-for'] || '';
+		const geo = geoip.lookup(clientIp) || {};
+		await SessionTrack.create({
+			userId,
+			sessionId: req.sessionID,
+			userAgent: ua,
+			browser: {
+				name: parsed.browser.name || 'Unknown',
+				version: parsed.browser.version || '',
+			},
+			os: {
+				name: parsed.os.name || 'Unknown',
+				version: parsed.os.version || '',
+			},
+			device: {
+				type: deviceType,
+				vendor: parsed.device.vendor || '',
+				model: parsed.device.model || '',
+			},
+			location: {
+				country: geo.country || '',
+				region: geo.region || '',
+				city: geo.city || '',
+			},
+			lastSeenAt: new Date(),
+		});
+	} catch (err) {
+		console.error('Error creating SessionTrack:', err);
+	}
+};
 
 const createStorefrontForUser = async (userId) => {
 	try {
-		
 		const existing = await Storefront.findOne({ user: userId });
 		if (existing) return existing;
 
@@ -66,7 +103,7 @@ const authController = {
 				email: user.email,
 			};
 
-			
+			await createSessionTrack(req, user._id);
 
 			return res.status(200).json({ message: 'Login successful' });
 		});
@@ -90,7 +127,6 @@ const authController = {
 			const googleUser = await response.json();
 			let user = await User.findOne({ email: googleUser.email });
 
-			
 			let isNewUser = false;
 
 			if (!user) {
@@ -103,7 +139,6 @@ const authController = {
 				await user.save();
 				isNewUser = true;
 			}
-
 
 			if (isNewUser) {
 				await createStorefrontForUser(user._id);
@@ -127,7 +162,7 @@ const authController = {
 						return res.status(500).json({ message: 'Internal server error' });
 					}
 
-					
+					await createSessionTrack(req, user._id);
 
 					return res.status(200).json({ message: 'Login successful' });
 				});

@@ -1,6 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
 const { ApiError } = require('./error.middleware.js');
-
 const validate = (schema, property = 'body') => {
 	return (req, res, next) => {
 		const { error, value } = schema.validate(req[property], {
